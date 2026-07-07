@@ -6,7 +6,7 @@ export const mockTracks = [
     album: "Afterglow City",
     artworkUrl: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=360&q=80",
     externalUrl: "https://music.apple.com/",
-    previewUrl: "",
+    previewUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
     color: "linear-gradient(135deg, #ff4f81, #2ad4ff)"
   },
   {
@@ -26,7 +26,7 @@ export const mockTracks = [
     album: "Late Train Tapes",
     artworkUrl: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=360&q=80",
     externalUrl: "https://music.apple.com/",
-    previewUrl: "",
+    previewUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
     color: "linear-gradient(135deg, #a855f7, #facc15)"
   },
   {
@@ -49,6 +49,7 @@ export const mockNearbyPosts = [
     distance: "210m",
     place: "駅前通り",
     comment: "夜の帰り道に合う音。",
+    location: { latitude: 35.68135, longitude: 139.76709 },
     marker: { x: 62, y: 34 }
   },
   {
@@ -58,6 +59,7 @@ export const mockNearbyPosts = [
     distance: "480m",
     place: "高架下",
     comment: "雨が止んだ瞬間。",
+    location: { latitude: 35.67889, longitude: 139.76481 },
     marker: { x: 36, y: 58 }
   },
   {
@@ -67,6 +69,7 @@ export const mockNearbyPosts = [
     distance: "820m",
     place: "ホーム端",
     comment: "終電前の感じ。",
+    location: { latitude: 35.68428, longitude: 139.76919 },
     marker: { x: 72, y: 67 }
   }
 ];
@@ -80,6 +83,7 @@ export const mockArchivePosts = [
     distance: "1.2km",
     place: "川沿い",
     comment: "朝になる直前。",
+    location: { latitude: 35.67591, longitude: 139.77122 },
     marker: { x: 44, y: 42 }
   }
 ];

@@ -2,7 +2,7 @@ import { ExternalLink, MapPin, Play } from "lucide-react";
 import AlbumArtwork from "./AlbumArtwork.jsx";
 import { formatTime } from "../utils/format.js";
 
-function MapBottomSheet({ post }) {
+function MapBottomSheet({ post, onPreview }) {
   if (!post) {
     return null;
   }
@@ -17,15 +17,20 @@ function MapBottomSheet({ post }) {
           <span>{formatTime(post.createdAt)}</span>
           <span>
             <MapPin size={13} aria-hidden="true" />
-            {post.distance}
+            {post.distance || "投稿地点"}
           </span>
         </div>
         <div className="track-actions">
-          {post.track.previewUrl ? (
-            <button className="soft-button" type="button">
+          {post.track.previewUrl && onPreview ? (
+            <button className="soft-button" type="button" onClick={() => onPreview?.(post.track)}>
               <Play size={16} aria-hidden="true" />
               <span>再生</span>
             </button>
+          ) : post.track.previewUrl ? (
+            <a className="soft-button" href={post.track.previewUrl} target="_blank" rel="noreferrer">
+              <Play size={16} aria-hidden="true" />
+              <span>再生</span>
+            </a>
           ) : (
             <a className="soft-button" href={post.track.externalUrl} target="_blank" rel="noreferrer">
               <ExternalLink size={16} aria-hidden="true" />

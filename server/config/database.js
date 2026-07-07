@@ -9,12 +9,13 @@ export async function connectDatabase() {
 
   try {
     mongoose.set("strictQuery", true);
+    mongoose.set("bufferCommands", false);
     await mongoose.connect(env.mongoUri);
     console.log("MongoDB connected.");
     return { connected: true };
   } catch (error) {
     console.error("MongoDB connection failed:", error.message);
-    throw error;
+    return { connected: false, reason: "connection-failed", error: error.message };
   }
 }
 
@@ -24,4 +25,8 @@ export function getDatabaseStatus() {
   return {
     state: states[mongoose.connection.readyState] || "unknown"
   };
+}
+
+export function isDatabaseConnected() {
+  return mongoose.connection.readyState === 1;
 }

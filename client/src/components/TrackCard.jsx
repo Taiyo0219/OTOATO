@@ -1,7 +1,7 @@
 import { Check, ExternalLink, Play } from "lucide-react";
 import AlbumArtwork from "./AlbumArtwork.jsx";
 
-function TrackCard({ track, isSelected = false, onSelect }) {
+function TrackCard({ track, isSelected = false, onSelect, onPreview }) {
   return (
     <article className={`track-card${isSelected ? " is-selected" : ""}`}>
       <AlbumArtwork track={track} />
@@ -11,7 +11,7 @@ function TrackCard({ track, isSelected = false, onSelect }) {
         <p className="track-album">{track.album}</p>
         <div className="track-actions">
           {track.previewUrl ? (
-            <button className="soft-button" type="button">
+            <button className="soft-button" type="button" onClick={() => onPreview?.(track)}>
               <Play size={16} aria-hidden="true" />
               <span>プレビュー</span>
             </button>
