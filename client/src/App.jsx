@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage.jsx";
 import PostPage from "./pages/PostPage.jsx";
 import ArchivePage from "./pages/ArchivePage.jsx";
 import MyPage from "./pages/MyPage.jsx";
+import PostDetailPage from "./pages/PostDetailPage.jsx";
 import { useCurrentRoute } from "./hooks/useCurrentRoute.js";
 
 const routeTable = {
@@ -15,12 +16,18 @@ const routeTable = {
 
 function App() {
   const { path, navigate } = useCurrentRoute();
-  const Page = useMemo(() => routeTable[path] || HomePage, [path]);
+  const Page = useMemo(() => {
+    if (path.startsWith("/posts/")) {
+      return PostDetailPage;
+    }
+
+    return routeTable[path] || HomePage;
+  }, [path]);
 
   return (
     <div className="app-shell">
       <main className="app-main">
-        <Page navigate={navigate} />
+        <Page navigate={navigate} path={path} />
       </main>
       <BottomNavigation activePath={path} onNavigate={navigate} />
     </div>

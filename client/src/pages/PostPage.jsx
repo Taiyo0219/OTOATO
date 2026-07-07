@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { MapPin, Search } from "lucide-react";
 import AlbumArtwork from "../components/AlbumArtwork.jsx";
 import AppHeader from "../components/AppHeader.jsx";
@@ -19,7 +19,7 @@ const visibilityOptions = [
 function PostPage() {
   const [query, setQuery] = useState("");
   const [tracks, setTracks] = useState(mockTracks);
-  const [selectedTrack, setSelectedTrack] = useState(mockTracks[0]);
+  const [selectedTrack, setSelectedTrack] = useState(null);
   const [visibility, setVisibility] = useState("public");
   const [comment, setComment] = useState("");
   const [locationMode, setLocationMode] = useState("current");
@@ -30,20 +30,10 @@ function PostPage() {
   const [submitMessage, setSubmitMessage] = useState("");
   const { status, coords, errorMessage, requestLocation } = useGeolocation();
 
-  const filteredTracks = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-
-    if (!normalizedQuery) {
-      return tracks;
-    }
-
-    return tracks.filter((track) =>
-      `${track.title} ${track.artist} ${track.album}`.toLowerCase().includes(normalizedQuery)
-    );
-  }, [query, tracks]);
-
   const selectedVisibilityLabel = visibilityOptions.find((option) => option.value === visibility)?.label;
-  const canSubmit = Boolean(selectedTrack && selectedLocation && visibility);
+  const normalizedQuery = query.trim();
+  const canSearch = normalizedQuery.length >= 2 && musicStatus !== "loading";
+  const canSubmit = Boolean(selectedTrack?.externalId && selectedLocation && visibility);
 
   useEffect(() => {
     if (coords && locationMode === "current") {
@@ -56,33 +46,27 @@ function PostPage() {
     }
   }, [coords, locationMode]);
 
-  useEffect(() => {
-    let isActive = true;
-    const timer = window.setTimeout(async () => {
-      setMusicStatus("loading");
-      const result = await searchMusic(query);
+  const handleSearch = async (event) => {
+    event?.preventDefault();
 
-      if (!isActive) {
-        return;
+    if (!canSearch) {
+      if (normalizedQuery.length > 0 && normalizedQuery.length < 2) {
+        setMusicMessage("2文字以上で検索してください");
       }
+      return;
+    }
 
-      setTracks(result.tracks.length > 0 ? result.tracks : []);
-      setMusicMessage(result.message || "");
-      setMusicStatus(result.source === "apple-music" ? "success" : "mock");
+    setMusicStatus("loading");
+    setMusicMessage("");
+    setSubmitMessage("");
 
-      if (result.tracks.length > 0) {
-        setSelectedTrack((currentTrack) => {
-          const stillExists = result.tracks.some((track) => track.externalId === currentTrack.externalId);
-          return stillExists ? currentTrack : result.tracks[0];
-        });
-      }
-    }, query.trim() ? 350 : 0);
+    const result = await searchMusic(normalizedQuery);
 
-    return () => {
-      isActive = false;
-      window.clearTimeout(timer);
-    };
-  }, [query]);
+    setTracks(result.tracks || []);
+    setSelectedTrack(null);
+    setMusicMessage(result.message || "");
+    setMusicStatus(result.source === "mock" ? "mock" : "success");
+  };
 
   const handleUseCurrentLocation = () => {
     setLocationMode("current");
@@ -143,17 +127,20 @@ function PostPage() {
     <div className="page-stack">
       <AppHeader title="この場所に残す曲" subtitle="曲を選んで、短い記憶を添える" />
 
-      <section className="search-panel">
+      <form className="search-panel" onSubmit={handleSearch}>
         <label className="search-field">
           <Search size={18} aria-hidden="true" />
           <input
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="曲名・アーティスト名で検索"
+            placeholder="曲名・アーティスト名・動画名で検索"
           />
         </label>
-      </section>
+        <button className="primary-button" type="submit" disabled={!canSearch}>
+          {musicStatus === "loading" ? "検索中..." : "検索"}
+        </button>
+      </form>
 
       {musicStatus === "loading" ? <p className="status-banner">楽曲を検索中です</p> : null}
       {musicMessage ? <p className="status-banner">{musicMessage}</p> : null}
@@ -161,17 +148,16 @@ function PostPage() {
       <section className="content-section">
         <div className="section-heading">
           <h2>検索結果</h2>
-          <span>{filteredTracks.length} songs</span>
+          <span>{tracks.length} videos</span>
         </div>
-        {filteredTracks.length > 0 ? (
+        {tracks.length > 0 ? (
           <div className="list-stack">
-            {filteredTracks.map((track) => (
+            {tracks.map((track) => (
               <TrackCard
                 key={track.externalId}
                 track={track}
-                isSelected={selectedTrack.externalId === track.externalId}
+                isSelected={selectedTrack?.externalId === track.externalId}
                 onSelect={setSelectedTrack}
-                onPreview={setSelectedTrack}
               />
             ))}
           </div>
@@ -182,16 +168,20 @@ function PostPage() {
         )}
       </section>
 
-      <section className="selected-track-panel">
-        <AlbumArtwork track={selectedTrack} size="xl" />
-        <div>
-          <p className="panel-eyebrow">Selected</p>
-          <h2>{selectedTrack.title}</h2>
-          <p>{selectedTrack.artist}</p>
-        </div>
-      </section>
+      {selectedTrack ? (
+        <>
+          <section className="selected-track-panel">
+            <AlbumArtwork track={selectedTrack} size="xl" />
+            <div>
+              <p className="panel-eyebrow">Selected</p>
+              <h2>{selectedTrack.title}</h2>
+              <p>{selectedTrack.artist}</p>
+            </div>
+          </section>
 
-      <TrackPreviewPanel track={selectedTrack} />
+          <TrackPreviewPanel track={selectedTrack} />
+        </>
+      ) : null}
 
       <section className="form-panel">
         <div className="section-heading">
@@ -274,10 +264,10 @@ function PostPage() {
             <span>{canSubmit ? "ready" : "waiting"}</span>
           </div>
           <div className="confirmation-content">
-            <AlbumArtwork track={selectedTrack} size="sm" />
+            {selectedTrack ? <AlbumArtwork track={selectedTrack} size="sm" /> : <div className="empty-artwork" />}
             <div className="confirmation-copy">
-              <p className="track-title">{selectedTrack.title}</p>
-              <p className="track-meta">{selectedTrack.artist}</p>
+              <p className="track-title">{selectedTrack?.title || "動画未選択"}</p>
+              <p className="track-meta">{selectedTrack?.artist || "検索結果から選択してください"}</p>
               <dl className="confirmation-details">
                 <div>
                   <dt>場所</dt>

@@ -1,4 +1,4 @@
-import { searchMusic } from "../services/appleMusicService.js";
+import { searchMusic } from "../services/music/musicProvider.js";
 
 export async function searchMusicController(req, res, next) {
   try {

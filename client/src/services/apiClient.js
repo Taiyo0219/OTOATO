@@ -30,20 +30,30 @@ export async function searchMusic(query) {
   if (!normalizedQuery) {
     return {
       source: "mock",
-      message: "現在はデモ楽曲を表示しています",
+      message: "",
       tracks: mockTracks
+    };
+  }
+
+  if (normalizedQuery.length < 2) {
+    return {
+      source: "local",
+      message: "2文字以上で検索してください",
+      tracks: []
     };
   }
 
   try {
     return await requestJson(`/api/music/search?q=${encodeURIComponent(normalizedQuery)}`);
   } catch (error) {
+    const tracks = mockTracks.filter((track) =>
+      `${track.title} ${track.artist}`.toLowerCase().includes(normalizedQuery.toLowerCase())
+    );
+
     return {
       source: "mock",
       message: "現在はデモ楽曲を表示しています",
-      tracks: mockTracks.filter((track) =>
-        `${track.title} ${track.artist} ${track.album}`.toLowerCase().includes(normalizedQuery.toLowerCase())
-      )
+      tracks: tracks.length > 0 ? tracks : mockTracks
     };
   }
 }
@@ -94,6 +104,26 @@ export async function fetchArchivePosts(date) {
       source: "mock",
       message: "現在はデモ投稿を表示しています",
       posts: mockArchivePosts.filter((post) => post.createdAt.startsWith(date))
+    };
+  }
+}
+
+export async function fetchPostById(id) {
+  try {
+    const data = await requestJson(`/api/posts/${encodeURIComponent(id)}`);
+
+    return {
+      source: "api",
+      message: "",
+      post: data.post
+    };
+  } catch (error) {
+    const post = [...mockNearbyPosts, ...mockArchivePosts].find((item) => item.id === id);
+
+    return {
+      source: "mock",
+      message: post ? "現在はデモ投稿を表示しています" : "投稿が見つかりません",
+      post: post || null
     };
   }
 }

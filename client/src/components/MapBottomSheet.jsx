@@ -1,8 +1,8 @@
-import { ExternalLink, MapPin, Play } from "lucide-react";
+import { ExternalLink, MapPin } from "lucide-react";
 import AlbumArtwork from "./AlbumArtwork.jsx";
 import { formatTime } from "../utils/format.js";
 
-function MapBottomSheet({ post, onPreview }) {
+function MapBottomSheet({ post, onOpenDetails }) {
   if (!post) {
     return null;
   }
@@ -13,6 +13,7 @@ function MapBottomSheet({ post, onPreview }) {
       <div className="sheet-body">
         <p className="track-title">{post.track.title}</p>
         <p className="track-meta">{post.track.artist}</p>
+        {post.comment ? <p className="sheet-comment">{post.comment}</p> : null}
         <div className="post-inline-meta">
           <span>{formatTime(post.createdAt)}</span>
           <span>
@@ -21,23 +22,13 @@ function MapBottomSheet({ post, onPreview }) {
           </span>
         </div>
         <div className="track-actions">
-          {post.track.previewUrl && onPreview ? (
-            <button className="soft-button" type="button" onClick={() => onPreview?.(post.track)}>
-              <Play size={16} aria-hidden="true" />
-              <span>再生</span>
-            </button>
-          ) : post.track.previewUrl ? (
-            <a className="soft-button" href={post.track.previewUrl} target="_blank" rel="noreferrer">
-              <Play size={16} aria-hidden="true" />
-              <span>再生</span>
-            </a>
-          ) : (
+          {post.track.externalUrl ? (
             <a className="soft-button" href={post.track.externalUrl} target="_blank" rel="noreferrer">
               <ExternalLink size={16} aria-hidden="true" />
-              <span>Apple Music</span>
+              <span>YouTube</span>
             </a>
-          )}
-          <button className="select-button" type="button">
+          ) : null}
+          <button className="select-button" type="button" onClick={() => onOpenDetails?.(post)}>
             詳細を見る
           </button>
         </div>

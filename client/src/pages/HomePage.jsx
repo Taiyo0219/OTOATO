@@ -4,7 +4,6 @@ import LeafletMap from "../components/LeafletMap.jsx";
 import LocationStatusPanel from "../components/LocationStatusPanel.jsx";
 import MapBottomSheet from "../components/MapBottomSheet.jsx";
 import PostListItem from "../components/PostListItem.jsx";
-import TrackPreviewPanel from "../components/TrackPreviewPanel.jsx";
 import { useGeolocation } from "../hooks/useGeolocation.js";
 import { fetchNearbyPosts } from "../services/apiClient.js";
 import { mockNearbyPosts } from "../utils/mockData.js";
@@ -12,7 +11,6 @@ import { mockNearbyPosts } from "../utils/mockData.js";
 function HomePage({ navigate }) {
   const [posts, setPosts] = useState(mockNearbyPosts);
   const [selectedPost, setSelectedPost] = useState(mockNearbyPosts[0]);
-  const [previewTrack, setPreviewTrack] = useState(null);
   const [postsStatus, setPostsStatus] = useState("idle");
   const [postsMessage, setPostsMessage] = useState("現在はデモ投稿を表示しています");
   const { status, coords, errorMessage, requestLocation } = useGeolocation();
@@ -74,23 +72,21 @@ function HomePage({ navigate }) {
             compact
           />
         </div>
-        <MapBottomSheet post={selectedPost} onPreview={setPreviewTrack} />
+        <MapBottomSheet post={selectedPost} onOpenDetails={(post) => navigate(`/posts/${post.id}`)} />
       </div>
 
       {postsStatus === "loading" ? <p className="status-banner">周辺の投稿を取得中です</p> : null}
       {postsMessage ? <p className="status-banner">{postsMessage}</p> : null}
 
-      <TrackPreviewPanel track={previewTrack} />
-
       <section className="content-section">
         <div className="section-heading">
           <h2>近くの投稿</h2>
-          <span>{posts.length} songs</span>
+          <span>{posts.length} videos</span>
         </div>
         {posts.length > 0 ? (
           <div className="list-stack">
             {posts.map((post) => (
-              <PostListItem key={post.id} post={post} onPreview={setPreviewTrack} />
+              <PostListItem key={post.id} post={post} onOpenDetails={() => navigate(`/posts/${post.id}`)} />
             ))}
           </div>
         ) : (

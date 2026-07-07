@@ -1,6 +1,7 @@
 import { isDatabaseConnected } from "../config/database.js";
 import { Post } from "../models/Post.js";
 import { serializePost } from "../utils/postSerializer.js";
+import mongoose from "mongoose";
 
 const visibilityValues = new Set(["private", "friends", "public"]);
 
@@ -28,6 +29,7 @@ function parseCoordinate(value) {
 
 function validatePostPayload(body) {
   const track = body.track || {};
+  const externalId = String(track.externalId || "").trim();
   const title = String(track.title || "").trim();
   const artist = String(track.artist || "").trim();
   const latitude = parseCoordinate(body.latitude);
@@ -41,6 +43,10 @@ function validatePostPayload(body) {
 
   if (!artist) {
     throw createValidationError("アーティスト名は必須です。");
+  }
+
+  if (!externalId) {
+    throw createValidationError("動画IDは必須です。");
   }
 
   if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) {
@@ -61,7 +67,8 @@ function validatePostPayload(body) {
 
   return {
     track: {
-      externalId: String(track.externalId || `${title}-${artist}`),
+      provider: String(track.provider || "youtube"),
+      externalId,
       title,
       artist,
       album: String(track.album || ""),
@@ -173,6 +180,13 @@ export async function getArchivePosts(req, res, next) {
 export async function getPostById(req, res, next) {
   try {
     assertDatabaseConnection();
+
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      const error = new Error("投稿が見つかりません。");
+      error.status = 404;
+      throw error;
+    }
+
     const post = await Post.findById(req.params.id);
 
     if (!post || post.visibility !== "public") {

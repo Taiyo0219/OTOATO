@@ -1,13 +1,19 @@
 import { Router } from "express";
 import { getDatabaseStatus } from "../config/database.js";
+import { getMusicProviderStatus } from "../services/music/youtubeProvider.js";
 
 const router = Router();
 
 router.get("/", (req, res) => {
+  const database = getDatabaseStatus();
+
   res.json({
     ok: true,
+    server: "ok",
     service: "otoato-api",
-    database: getDatabaseStatus()
+    mongodb: database.state,
+    database,
+    musicProvider: getMusicProviderStatus()
   });
 });
 

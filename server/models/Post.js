@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const trackSchema = new mongoose.Schema(
   {
+    provider: { type: String, default: "youtube" },
     externalId: { type: String, required: true },
     title: { type: String, required: true },
     artist: { type: String, required: true },

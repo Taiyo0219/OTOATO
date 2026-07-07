@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
 import AppHeader from "../components/AppHeader.jsx";
 import PostListItem from "../components/PostListItem.jsx";
-import TrackPreviewPanel from "../components/TrackPreviewPanel.jsx";
 import { fetchArchivePosts } from "../services/apiClient.js";
 import { formatDateLabel } from "../utils/format.js";
 
 const defaultDate = "2026-07-07";
 
-function ArchivePage() {
+function ArchivePage({ navigate }) {
   const [date, setDate] = useState(defaultDate);
   const [posts, setPosts] = useState([]);
-  const [previewTrack, setPreviewTrack] = useState(null);
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("");
 
@@ -51,18 +49,16 @@ function ArchivePage() {
       {status === "loading" ? <p className="status-banner">アーカイブを検索中です</p> : null}
       {message ? <p className="status-banner">{message}</p> : null}
 
-      <TrackPreviewPanel track={previewTrack} />
-
       <section className="content-section">
         <div className="section-heading">
           <h2>{formatDateLabel(date)}</h2>
-          <span>{posts.length} songs</span>
+          <span>{posts.length} videos</span>
         </div>
 
         {posts.length > 0 ? (
           <div className="list-stack">
             {posts.map((post) => (
-              <PostListItem key={post.id} post={post} onPreview={setPreviewTrack} />
+              <PostListItem key={post.id} post={post} onOpenDetails={() => navigate(`/posts/${post.id}`)} />
             ))}
           </div>
         ) : (

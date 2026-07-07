@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 const knownPaths = new Set(["/", "/post", "/archive", "/mypage"]);
 
 function normalizePath(pathname) {
+  if (/^\/posts\/[^/]+$/.test(pathname)) {
+    return pathname;
+  }
+
   return knownPaths.has(pathname) ? pathname : "/";
 }
 
