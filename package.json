@@ -1,0 +1,20 @@
+{
+  "name": "otoato",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OTOATO location-based music sharing app scaffold.",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server run dev",
+    "build": "npm --prefix client run build",
+    "start": "npm --prefix server start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
