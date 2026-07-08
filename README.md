@@ -1,6 +1,6 @@
 # OTOATO
 
-位置情報音楽共有Webアプリ OTOATO の Phase 1 - Phase 8.5 実装です。
+位置情報音楽共有Webアプリ OTOATO の Phase 1 - Phase 8.6 実装です。
 
 ## 実装済み
 
@@ -25,6 +25,7 @@
 - YouTube API失敗時のモック楽曲フォールバック
 - YouTube公式iframeプレイヤーでの再生
 - 投稿詳細画面
+- Vercel + Render + MongoDB Atlas 向けの本番デプロイ設定
 
 ## まだ実装していないこと
 
@@ -35,7 +36,7 @@
 - Spotify連携
 - YouTube以外の音楽プロバイダー本実装
 
-## 起動方法
+## Local Development
 
 ```bash
 npm install
@@ -62,7 +63,7 @@ YouTube Data APIを使う場合は `server/.env` だけ編集します。
 PORT=5000
 MONGODB_URI=
 YOUTUBE_API_KEY=
-CLIENT_ORIGIN=http://localhost:5173
+CLIENT_ORIGIN=
 ```
 
 YouTube APIキーの設定手順:
@@ -78,6 +79,76 @@ YouTube APIキーの設定手順:
 
 `YOUTUBE_API_KEY` が未設定、無効、クォータ制限、通信失敗の場合は、自動的にモック楽曲検索へ切り替わります。
 APIキーは必ず `server/.env` に置き、フロントエンドには置かないでください。
+
+フロントエンドの本番API接続先だけ、`client/.env` またはVercelの環境変数に設定できます。
+秘密情報は `VITE_` 付きの環境変数に入れないでください。
+
+```env
+VITE_API_BASE_URL=
+```
+
+ローカル開発では `VITE_API_BASE_URL` は未設定のままにします。
+本番ではRenderのURLを `/api` なしで指定します。
+
+```env
+VITE_API_BASE_URL=https://otoato-api.onrender.com
+```
+
+## Production
+
+想定構成:
+
+- Frontend: Vercel
+- Backend: Render
+- Database: MongoDB Atlas
+
+開発環境では `/api` をVite Proxyで `http://localhost:5000` へ転送します。
+本番環境では `VITE_API_BASE_URL` を設定すると、フロントエンドは `${VITE_API_BASE_URL}/api/...` へ通信します。
+
+### Render Environment Variables
+
+Renderのバックエンドに以下を設定します。
+
+```env
+MONGODB_URI=
+YOUTUBE_API_KEY=
+CLIENT_ORIGIN=https://otoato.vercel.app
+```
+
+`CLIENT_ORIGIN` はVercelの実URLに置き換えてください。
+複数Originを許可する場合はカンマ区切りで指定できます。
+
+```env
+CLIENT_ORIGIN=https://otoato.vercel.app,https://otoato-git-main-user.vercel.app
+```
+
+`PORT` はRenderが提供する値を使用するため、通常は設定不要です。
+
+### Vercel Environment Variables
+
+Vercelのフロントエンドに以下を設定します。
+
+```env
+VITE_API_BASE_URL=https://otoato-api.onrender.com
+```
+
+`YOUTUBE_API_KEY`、`MONGODB_URI`、`JWT_SECRET`、Database UserのパスワードはVercelへ設定しないでください。
+
+### Deploy Settings
+
+Render:
+
+- Root Directory: `server`
+- Build Command: `npm install`
+- Start Command: `npm start`
+
+Vercel:
+
+- Root Directory: `client`
+- Build Command: `npm run build`
+- Output Directory: `dist`
+
+`client/vercel.json` でSPA rewriteを設定しているため、`/post`、`/archive`、`/posts/:id`、`/mypage` を直接開いても `index.html` が返ります。
 
 ## YouTube検索
 

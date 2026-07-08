@@ -1,13 +1,20 @@
 import { mockArchivePosts, mockNearbyPosts, mockTracks } from "../utils/mockData.js";
 
-const API_BASE_URL = "/api";
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+const API_BASE_URL = configuredApiBaseUrl ? `${configuredApiBaseUrl}/api` : "/api";
 
 function getRequestUrl(path) {
-  if (path.startsWith("/api")) {
+  if (/^https?:\/\//i.test(path)) {
     return path;
   }
 
-  return `${API_BASE_URL}${path}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  if (normalizedPath.startsWith("/api")) {
+    return configuredApiBaseUrl ? `${configuredApiBaseUrl}${normalizedPath}` : normalizedPath;
+  }
+
+  return `${API_BASE_URL}${normalizedPath}`;
 }
 
 function logApiDebug({ url, status, error }) {

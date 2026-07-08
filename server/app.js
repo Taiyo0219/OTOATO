@@ -10,11 +10,26 @@ import postRoutes from "./routes/postRoutes.js";
 
 const app = express();
 
-const allowedOrigins = env.clientOrigin.split(",").map((origin) => origin.trim());
+const allowedOrigins = env.clientOrigin
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+function isAllowedOrigin(origin) {
+  if (!origin) {
+    return true;
+  }
+
+  if (env.nodeEnv === "development") {
+    return true;
+  }
+
+  return allowedOrigins.includes(origin);
+}
 
 app.use(cors({
   origin(origin, callback) {
-    if (!origin || env.nodeEnv === "development" || allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       callback(null, true);
       return;
     }
