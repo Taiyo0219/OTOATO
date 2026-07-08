@@ -53,7 +53,8 @@ npm.cmd run dev
 
 ## 環境変数
 
-サーバー側で MongoDB に接続する場合は `server/.env` を作成してください。
+YouTube Data APIを使う場合は `server/.env` だけ編集します。
+`server/.env` が無い場合は、まず `server/.env.example` をコピーして作成してください。
 
 ```env
 PORT=5000
@@ -61,6 +62,14 @@ MONGODB_URI=
 YOUTUBE_API_KEY=
 CLIENT_ORIGIN=http://localhost:5173
 ```
+
+YouTube APIキーの設定手順:
+
+1. `server/.env` を作成
+2. `YOUTUBE_API_KEY=` の右側にAPIキーを貼る
+3. `npm.cmd run dev`
+4. `http://localhost:5000/api/health` を開く
+5. `musicProvider` が `youtube` なら成功
 
 `MONGODB_URI` が未設定の場合でも開発サーバーは起動し、接続はスキップされます。
 投稿保存、周辺投稿、アーカイブ検索は MongoDB 接続後に利用できます。
