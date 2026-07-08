@@ -1,27 +1,58 @@
 import { mockArchivePosts, mockNearbyPosts, mockTracks } from "../utils/mockData.js";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = "/api";
 
-async function requestJson(path, options) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers
-    },
-    ...options
-  });
-
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(data.message || "API通信に失敗しました。");
+function getRequestUrl(path) {
+  if (path.startsWith("/api")) {
+    return path;
   }
 
-  return data;
+  return `${API_BASE_URL}${path}`;
+}
+
+function logApiDebug({ url, status, error }) {
+  if (!import.meta.env.DEV) {
+    return;
+  }
+
+  console.debug("API request:", url);
+  if (status) {
+    console.debug("API status:", status);
+  }
+  if (error) {
+    console.debug("API error:", error.message || String(error));
+  }
+}
+
+async function requestJson(path, options) {
+  const url = getRequestUrl(path);
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        ...options?.headers
+      },
+      ...options
+    });
+
+    logApiDebug({ url, status: response.status });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(data.message || "API通信に失敗しました。");
+    }
+
+    return data;
+  } catch (error) {
+    logApiDebug({ url, error });
+    throw error;
+  }
 }
 
 export async function fetchHealth() {
-  return requestJson("/api/health");
+  return requestJson("/health");
 }
 
 export async function searchMusic(query) {
@@ -44,7 +75,7 @@ export async function searchMusic(query) {
   }
 
   try {
-    return await requestJson(`/api/music/search?q=${encodeURIComponent(normalizedQuery)}`);
+    return await requestJson(`/music/search?q=${encodeURIComponent(normalizedQuery)}`);
   } catch (error) {
     const tracks = mockTracks.filter((track) =>
       `${track.title} ${track.artist}`.toLowerCase().includes(normalizedQuery.toLowerCase())
@@ -59,7 +90,7 @@ export async function searchMusic(query) {
 }
 
 export async function createPost(payload) {
-  const data = await requestJson("/api/posts", {
+  const data = await requestJson("/posts", {
     method: "POST",
     body: JSON.stringify(payload)
   });
@@ -74,7 +105,7 @@ export async function fetchNearbyPosts({ latitude, longitude, radius = 1000 }) {
       lng: String(longitude),
       radius: String(radius)
     });
-    const data = await requestJson(`/api/posts/nearby?${params.toString()}`);
+    const data = await requestJson(`/posts/nearby?${params.toString()}`);
 
     return {
       source: "api",
@@ -91,8 +122,12 @@ export async function fetchNearbyPosts({ latitude, longitude, radius = 1000 }) {
 }
 
 export async function fetchArchivePosts(date) {
+  if (import.meta.env.DEV) {
+    console.log("Archive request date:", date);
+  }
+
   try {
-    const data = await requestJson(`/api/posts/archive?date=${encodeURIComponent(date)}`);
+    const data = await requestJson(`/posts/archive?date=${encodeURIComponent(date)}`);
 
     return {
       source: "api",
@@ -110,7 +145,7 @@ export async function fetchArchivePosts(date) {
 
 export async function fetchPostById(id) {
   try {
-    const data = await requestJson(`/api/posts/${encodeURIComponent(id)}`);
+    const data = await requestJson(`/posts/${encodeURIComponent(id)}`);
 
     return {
       source: "api",

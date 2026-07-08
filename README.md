@@ -50,6 +50,8 @@ npm.cmd run dev
 ```
 
 クライアントは `http://localhost:5173`、サーバーは `http://localhost:5000` で起動します。
+スマートフォンから同じWi-Fi内で確認する場合は、ViteのNetwork URL（例: `http://PCのLAN内IP:5173`）へアクセスしてください。
+フロントエンドのAPI通信は `/api` の相対パスを使い、Vite dev serverがExpressへproxyします。
 
 ## 環境変数
 
@@ -94,6 +96,16 @@ YouTube動画は公式iframeプレイヤーで表示します。
 - `GET /api/posts/nearby?lat=35.0&lng=139.0&radius=1000`
 - `GET /api/posts/archive?date=2026-07-07`
 - `GET /api/posts/:id`
+
+## 開発Proxy
+
+開発環境ではViteが `/api` をExpressへ転送します。
+
+```text
+browser -> http://PCのLAN内IP:5173/api/... -> http://localhost:5000/api/...
+```
+
+このため、スマートフォン上のブラウザからもPC上のAPIを利用できます。
 
 ## 位置情報
 

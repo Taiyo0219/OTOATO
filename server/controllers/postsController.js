@@ -4,6 +4,7 @@ import { serializePost } from "../utils/postSerializer.js";
 import mongoose from "mongoose";
 
 const visibilityValues = new Set(["private", "friends", "public"]);
+const JST_OFFSET_HOURS = 9;
 
 function createValidationError(message) {
   const error = new Error(message);
@@ -88,10 +89,19 @@ function dateRangeForJstDate(dateText) {
     throw createValidationError("dateはYYYY-MM-DD形式で指定してください。");
   }
 
-  const start = new Date(`${dateText}T00:00:00+09:00`);
-  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  const [year, month, day] = dateText.split("-").map(Number);
+  const start = new Date(Date.UTC(year, month - 1, day, -JST_OFFSET_HOURS, 0, 0, 0));
+  const end = new Date(Date.UTC(year, month - 1, day + 1, -JST_OFFSET_HOURS, 0, 0, 0));
 
   return { start, end };
+}
+
+function logDevelopment(message, value) {
+  if (process.env.NODE_ENV === "production") {
+    return;
+  }
+
+  console.log(`${message}: ${value}`);
 }
 
 export async function createPost(req, res, next) {
@@ -108,6 +118,8 @@ export async function createPost(req, res, next) {
       visibility: payload.visibility,
       comment: payload.comment
     });
+
+    logDevelopment("Saved post createdAt", post.createdAt.toISOString());
 
     res.status(201).json({ post: serializePost(post) });
   } catch (error) {
@@ -170,6 +182,11 @@ export async function getArchivePosts(req, res, next) {
     })
       .sort({ createdAt: -1 })
       .limit(100);
+
+    logDevelopment("Archive requested date", date);
+    logDevelopment("Archive range start", start.toISOString());
+    logDevelopment("Archive range end", end.toISOString());
+    logDevelopment("Archive results", posts.length);
 
     res.json({ posts: posts.map(serializePost) });
   } catch (error) {

@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import AppHeader from "../components/AppHeader.jsx";
 import PostListItem from "../components/PostListItem.jsx";
 import { fetchArchivePosts } from "../services/apiClient.js";
-import { formatDateLabel } from "../utils/format.js";
+import { formatDateLabel, getTodayDateInputValue } from "../utils/format.js";
 
-const defaultDate = "2026-07-07";
+const defaultDate = getTodayDateInputValue();
 
 function ArchivePage({ navigate }) {
   const [date, setDate] = useState(defaultDate);
