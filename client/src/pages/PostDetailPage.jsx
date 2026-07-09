@@ -52,6 +52,7 @@ function PostDetailPage({ path, navigate }) {
               <span>{formatTime(post.createdAt)}</span>
             </div>
             <p className="track-meta">{post.track.artist}</p>
+            {post.author?.displayName ? <p className="track-meta">投稿者: {post.author.displayName}</p> : null}
             {post.comment ? <p className="detail-comment">{post.comment}</p> : null}
             <div className="post-inline-meta">
               <span>

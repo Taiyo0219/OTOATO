@@ -1,9 +1,12 @@
 import cors from "cors";
 import express from "express";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
 import morgan from "morgan";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { notFound } from "./middleware/notFound.js";
+import authRoutes from "./routes/authRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import musicRoutes from "./routes/musicRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
@@ -27,6 +30,17 @@ function isAllowedOrigin(origin) {
   return allowedOrigins.includes(origin);
 }
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 40,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    message: "認証リクエストが多すぎます。少し待ってから再試行してください。"
+  }
+});
+
+app.use(helmet());
 app.use(cors({
   origin(origin, callback) {
     if (isAllowedOrigin(origin)) {
@@ -44,6 +58,7 @@ app.get("/", (req, res) => {
   res.json({ ok: true, service: "OTOATO API" });
 });
 
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/health", healthRoutes);
 app.use("/api/music", musicRoutes);
 app.use("/api/posts", postRoutes);

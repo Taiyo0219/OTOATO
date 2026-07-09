@@ -17,6 +17,9 @@ function normalizeTrack(track = {}) {
 export function serializePost(post) {
   const raw = typeof post.toObject === "function" ? post.toObject() : post;
   const [longitude, latitude] = raw.location?.coordinates || [];
+  const userRef = raw.userId;
+  const hasPopulatedUser = userRef && typeof userRef === "object" && userRef._id;
+  const userId = hasPopulatedUser ? String(userRef._id) : userRef ? String(userRef) : null;
 
   return {
     id: String(raw._id),
@@ -28,6 +31,12 @@ export function serializePost(post) {
     visibility: raw.visibility,
     comment: raw.comment || "",
     createdAt: raw.createdAt,
-    userId: raw.userId ? String(raw.userId) : null
+    userId,
+    author: hasPopulatedUser
+      ? {
+          id: userId,
+          displayName: userRef.displayName || "匿名ユーザー"
+        }
+      : null
   };
 }

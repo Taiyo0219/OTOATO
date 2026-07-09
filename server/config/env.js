@@ -10,7 +10,9 @@ const isProductionRuntime = process.env.NODE_ENV === "production";
 const defaultEnvTemplate = `PORT=5000
 MONGODB_URI=
 YOUTUBE_API_KEY=
-CLIENT_ORIGIN=
+CLIENT_ORIGIN=http://localhost:5173
+JWT_SECRET=
+JWT_EXPIRES_IN=30d
 `;
 
 if (!existsSync(serverEnvPath)) {
@@ -39,10 +41,13 @@ export const env = {
   mongoUri: process.env.MONGODB_URI || "",
   youtubeApiKey: hasYouTubeApiKey ? process.env.YOUTUBE_API_KEY.trim() : "",
   clientOrigin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+  jwtSecret: process.env.JWT_SECRET || "",
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || "30d",
   nodeEnv: process.env.NODE_ENV || "development"
 };
 
 export function logEnvironmentStatus() {
   console.log(`YouTube API key: ${hasYouTubeApiKey ? "configured" : "not configured"}`);
   console.log(`Music provider: ${hasYouTubeApiKey ? "youtube" : "mock"}`);
+  console.log(`JWT secret: ${env.jwtSecret ? "configured" : "not configured"}`);
 }

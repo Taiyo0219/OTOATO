@@ -12,6 +12,7 @@ function PostListItem({ post, onOpenDetails }) {
         {post.comment ? <p className="post-comment">{post.comment}</p> : null}
         <div className="post-inline-meta">
           <span>{formatTime(post.createdAt)}</span>
+          {post.author?.displayName ? <span>{post.author.displayName}</span> : null}
           <span>
             <MapPin size={13} aria-hidden="true" />
             {post.place || "投稿地点"}

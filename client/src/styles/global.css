@@ -559,7 +559,8 @@ img {
 
 .search-field,
 .date-field,
-.comment-field {
+.comment-field,
+.auth-field {
   display: grid;
   gap: 8px;
 }
@@ -577,7 +578,9 @@ img {
 
 .search-field input,
 .date-field input,
-.comment-field textarea {
+.comment-field textarea,
+.auth-field input,
+.password-control input {
   width: 100%;
   min-width: 0;
   border: 0;
@@ -588,14 +591,17 @@ img {
 }
 
 .date-field,
-.comment-field {
+.comment-field,
+.auth-field {
   color: var(--text-sub);
   font-size: 13px;
   font-weight: 700;
 }
 
 .date-field input,
-.comment-field textarea {
+.comment-field textarea,
+.auth-field input,
+.password-control {
   min-height: 52px;
   padding: 12px;
   border: 1px solid var(--line);
@@ -906,9 +912,106 @@ img {
   cursor: pointer;
 }
 
+.segmented-control button:disabled {
+  color: rgba(255, 255, 255, 0.34);
+  cursor: not-allowed;
+}
+
 .segmented-control button.is-active {
   color: #101010;
   background: var(--accent-2);
+}
+
+.auth-panel,
+.auth-callout {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.auth-callout h2,
+.auth-callout p {
+  margin: 0;
+}
+
+.auth-callout h2 {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.auth-callout p:not(.panel-eyebrow) {
+  margin-top: 6px;
+  color: var(--text-sub);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.auth-mode-control {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.auth-mode-control button {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text-sub);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.auth-mode-control button.is-active {
+  color: #101010;
+  background: var(--accent-2);
+}
+
+.auth-form {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-field input {
+  padding: 0;
+}
+
+.password-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+}
+
+.password-control input {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.password-toggle {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text-sub);
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
 }
 
 .profile-avatar {

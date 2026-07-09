@@ -1,11 +1,13 @@
 import { Router } from "express";
-import { createPost, getArchivePosts, getNearbyPosts, getPostById } from "../controllers/postsController.js";
+import { createPost, getArchivePosts, getMyPosts, getNearbyPosts, getPostById } from "../controllers/postsController.js";
+import { attachOptionalUser, requireAuth } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
-router.post("/", createPost);
+router.post("/", requireAuth, createPost);
 router.get("/nearby", getNearbyPosts);
 router.get("/archive", getArchivePosts);
-router.get("/:id", getPostById);
+router.get("/mine", requireAuth, getMyPosts);
+router.get("/:id", attachOptionalUser, getPostById);
 
 export default router;

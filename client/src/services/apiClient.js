@@ -2,6 +2,7 @@ import { mockArchivePosts, mockNearbyPosts, mockTracks } from "../utils/mockData
 
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, "") || "";
 const API_BASE_URL = configuredApiBaseUrl ? `${configuredApiBaseUrl}/api` : "/api";
+const AUTH_TOKEN_STORAGE_KEY = "otoato_auth_token";
 
 function getRequestUrl(path) {
   if (/^https?:\/\//i.test(path)) {
@@ -15,6 +16,18 @@ function getRequestUrl(path) {
   }
 
   return `${API_BASE_URL}${normalizedPath}`;
+}
+
+export function getStoredAuthToken() {
+  return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || "";
+}
+
+export function setStoredAuthToken(token) {
+  window.localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+}
+
+export function clearStoredAuthToken() {
+  window.localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
 }
 
 function logApiDebug({ url, status, error }) {
@@ -31,16 +44,27 @@ function logApiDebug({ url, status, error }) {
   }
 }
 
-async function requestJson(path, options) {
+async function requestJson(path, options = {}) {
   const url = getRequestUrl(path);
+  const {
+    includeAuth = false,
+    headers,
+    ...fetchOptions
+  } = options;
+  const token = includeAuth ? getStoredAuthToken() : "";
+  const requestHeaders = {
+    "Content-Type": "application/json",
+    ...headers
+  };
+
+  if (token) {
+    requestHeaders.Authorization = `Bearer ${token}`;
+  }
 
   try {
     const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-        ...options?.headers
-      },
-      ...options
+      headers: requestHeaders,
+      ...fetchOptions
     });
 
     logApiDebug({ url, status: response.status });
@@ -60,6 +84,45 @@ async function requestJson(path, options) {
 
 export async function fetchHealth() {
   return requestJson("/health");
+}
+
+export async function registerUser(payload) {
+  const data = await requestJson("/auth/register", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+
+  setStoredAuthToken(data.token);
+  return data.user;
+}
+
+export async function loginUser(payload) {
+  const data = await requestJson("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+
+  setStoredAuthToken(data.token);
+  return data.user;
+}
+
+export async function fetchCurrentUser() {
+  const data = await requestJson("/auth/me", {
+    includeAuth: true
+  });
+
+  return data.user;
+}
+
+export async function logoutUser() {
+  try {
+    await requestJson("/auth/logout", {
+      method: "POST",
+      includeAuth: true
+    });
+  } finally {
+    clearStoredAuthToken();
+  }
 }
 
 export async function searchMusic(query) {
@@ -99,10 +162,19 @@ export async function searchMusic(query) {
 export async function createPost(payload) {
   const data = await requestJson("/posts", {
     method: "POST",
+    includeAuth: true,
     body: JSON.stringify(payload)
   });
 
   return data.post;
+}
+
+export async function fetchMyPosts() {
+  const data = await requestJson("/posts/mine", {
+    includeAuth: true
+  });
+
+  return data.posts;
 }
 
 export async function fetchNearbyPosts({ latitude, longitude, radius = 1000 }) {
@@ -152,7 +224,9 @@ export async function fetchArchivePosts(date) {
 
 export async function fetchPostById(id) {
   try {
-    const data = await requestJson(`/posts/${encodeURIComponent(id)}`);
+    const data = await requestJson(`/posts/${encodeURIComponent(id)}`, {
+      includeAuth: true
+    });
 
     return {
       source: "api",

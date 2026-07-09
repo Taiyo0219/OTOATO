@@ -5,13 +5,15 @@ import PostPage from "./pages/PostPage.jsx";
 import ArchivePage from "./pages/ArchivePage.jsx";
 import MyPage from "./pages/MyPage.jsx";
 import PostDetailPage from "./pages/PostDetailPage.jsx";
+import AuthPage from "./pages/AuthPage.jsx";
 import { useCurrentRoute } from "./hooks/useCurrentRoute.js";
 
 const routeTable = {
   "/": HomePage,
   "/post": PostPage,
   "/archive": ArchivePage,
-  "/mypage": MyPage
+  "/mypage": MyPage,
+  "/auth": AuthPage
 };
 
 function App() {

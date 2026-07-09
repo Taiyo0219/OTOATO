@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const knownPaths = new Set(["/", "/post", "/archive", "/mypage"]);
+const knownPaths = new Set(["/", "/post", "/archive", "/mypage", "/auth"]);
 
 function normalizePath(pathname) {
   if (/^\/posts\/[^/]+$/.test(pathname)) {

@@ -116,7 +116,8 @@ export async function createPost(req, res, next) {
         coordinates: [payload.longitude, payload.latitude]
       },
       visibility: payload.visibility,
-      comment: payload.comment
+      comment: payload.comment,
+      userId: req.user.id
     });
 
     logDevelopment("Saved post createdAt", post.createdAt.toISOString());
@@ -159,6 +160,7 @@ export async function getNearbyPosts(req, res, next) {
         }
       }
     })
+      .populate("userId", "displayName")
       .limit(50);
 
     res.json({ posts: posts.map(serializePost) });
@@ -180,6 +182,7 @@ export async function getArchivePosts(req, res, next) {
         $lt: end
       }
     })
+      .populate("userId", "displayName")
       .sort({ createdAt: -1 })
       .limit(100);
 
@@ -204,15 +207,31 @@ export async function getPostById(req, res, next) {
       throw error;
     }
 
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.id).populate("userId", "displayName");
+    const isOwner = post?.userId && req.user?.id && String(post.userId._id || post.userId) === req.user.id;
 
-    if (!post || post.visibility !== "public") {
+    if (!post || (post.visibility !== "public" && !isOwner)) {
       const error = new Error("投稿が見つかりません。");
       error.status = 404;
       throw error;
     }
 
     res.json({ post: serializePost(post) });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getMyPosts(req, res, next) {
+  try {
+    assertDatabaseConnection();
+
+    const posts = await Post.find({ userId: req.user.id })
+      .populate("userId", "displayName")
+      .sort({ createdAt: -1 })
+      .limit(100);
+
+    res.json({ posts: posts.map(serializePost) });
   } catch (error) {
     next(error);
   }
