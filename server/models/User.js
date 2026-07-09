@@ -19,6 +19,22 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       select: false
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: 160,
+      default: ""
+    },
+    favoriteGenres: {
+      type: [String],
+      default: [],
+      validate: {
+        validator(value) {
+          return value.length <= 8 && value.every((genre) => typeof genre === "string" && genre.length <= 24);
+        },
+        message: "favoriteGenresは8個以内、各24文字以内で指定してください。"
+      }
     }
   },
   {

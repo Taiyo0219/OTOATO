@@ -6,6 +6,12 @@ import TrackPreviewPanel from "../components/TrackPreviewPanel.jsx";
 import { fetchPostById } from "../services/apiClient.js";
 import { formatTime } from "../utils/format.js";
 
+const visibilityLabels = {
+  public: "公開",
+  friends: "友達",
+  private: "自分だけ"
+};
+
 function PostDetailPage({ path, navigate }) {
   const postId = decodeURIComponent(path.split("/").pop() || "");
   const [post, setPost] = useState(null);
@@ -53,6 +59,7 @@ function PostDetailPage({ path, navigate }) {
             </div>
             <p className="track-meta">{post.track.artist}</p>
             {post.author?.displayName ? <p className="track-meta">投稿者: {post.author.displayName}</p> : null}
+            <span className="visibility-badge">{visibilityLabels[post.visibility] || "公開"}</span>
             {post.comment ? <p className="detail-comment">{post.comment}</p> : null}
             <div className="post-inline-meta">
               <span>

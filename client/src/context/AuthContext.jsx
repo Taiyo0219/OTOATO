@@ -103,6 +103,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    setCurrentUser: setUser,
     clearMessage: () => setMessage("")
   }), [message, status, user]);
 

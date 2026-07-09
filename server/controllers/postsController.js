@@ -1,16 +1,11 @@
 import { isDatabaseConnected } from "../config/database.js";
 import { Post } from "../models/Post.js";
+import { createValidationError, dateRangeForJstDate } from "../utils/dateRange.js";
 import { serializePost } from "../utils/postSerializer.js";
+import { buildVisiblePostQuery } from "../utils/visibility.js";
 import mongoose from "mongoose";
 
 const visibilityValues = new Set(["private", "friends", "public"]);
-const JST_OFFSET_HOURS = 9;
-
-function createValidationError(message) {
-  const error = new Error(message);
-  error.status = 400;
-  return error;
-}
 
 function assertDatabaseConnection() {
   if (!isDatabaseConnected()) {
@@ -84,18 +79,6 @@ function validatePostPayload(body) {
   };
 }
 
-function dateRangeForJstDate(dateText) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateText)) {
-    throw createValidationError("dateはYYYY-MM-DD形式で指定してください。");
-  }
-
-  const [year, month, day] = dateText.split("-").map(Number);
-  const start = new Date(Date.UTC(year, month - 1, day, -JST_OFFSET_HOURS, 0, 0, 0));
-  const end = new Date(Date.UTC(year, month - 1, day + 1, -JST_OFFSET_HOURS, 0, 0, 0));
-
-  return { start, end };
-}
-
 function logDevelopment(message, value) {
   if (process.env.NODE_ENV === "production") {
     return;
@@ -147,9 +130,7 @@ export async function getNearbyPosts(req, res, next) {
     }
 
     assertDatabaseConnection();
-
-    const posts = await Post.find({
-      visibility: "public",
+    const query = await buildVisiblePostQuery(req.user?.id, {
       location: {
         $near: {
           $geometry: {
@@ -159,7 +140,9 @@ export async function getNearbyPosts(req, res, next) {
           $maxDistance: radius
         }
       }
-    })
+    });
+
+    const posts = await Post.find(query)
       .populate("userId", "displayName")
       .limit(50);
 
@@ -174,14 +157,14 @@ export async function getArchivePosts(req, res, next) {
     const date = String(req.query.date || "");
     const { start, end } = dateRangeForJstDate(date);
     assertDatabaseConnection();
-
-    const posts = await Post.find({
-      visibility: "public",
+    const query = await buildVisiblePostQuery(req.user?.id, {
       createdAt: {
         $gte: start,
         $lt: end
       }
-    })
+    });
+
+    const posts = await Post.find(query)
       .populate("userId", "displayName")
       .sort({ createdAt: -1 })
       .limit(100);
@@ -207,10 +190,10 @@ export async function getPostById(req, res, next) {
       throw error;
     }
 
-    const post = await Post.findById(req.params.id).populate("userId", "displayName");
-    const isOwner = post?.userId && req.user?.id && String(post.userId._id || post.userId) === req.user.id;
+    const query = await buildVisiblePostQuery(req.user?.id, { _id: req.params.id });
+    const post = await Post.findOne(query).populate("userId", "displayName");
 
-    if (!post || (post.visibility !== "public" && !isOwner)) {
+    if (!post) {
       const error = new Error("投稿が見つかりません。");
       error.status = 404;
       throw error;

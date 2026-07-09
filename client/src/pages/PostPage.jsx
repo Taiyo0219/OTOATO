@@ -12,9 +12,9 @@ import { createPost, searchMusic } from "../services/apiClient.js";
 import { mockTracks } from "../utils/mockData.js";
 
 const visibilityOptions = [
-  { value: "private", label: "自分だけ" },
-  { value: "friends", label: "友達のみ", disabled: true },
-  { value: "public", label: "全体公開" }
+  { value: "public", label: "公開", description: "誰でも見られます" },
+  { value: "friends", label: "友達", description: "相互フォローだけ" },
+  { value: "private", label: "自分だけ", description: "自分だけが振り返れます" }
 ];
 const POST_DRAFT_STORAGE_KEY = "otoato_post_draft";
 
@@ -271,20 +271,20 @@ function PostPage({ navigate }) {
           </button>
         ) : null}
 
-        <div className="segmented-control" role="group" aria-label="公開範囲">
+        <div className="segmented-control visibility-control" role="group" aria-label="公開範囲">
           {visibilityOptions.map((option) => (
             <button
               key={option.value}
               className={visibility === option.value ? "is-active" : ""}
               type="button"
-              disabled={option.disabled}
               onClick={() => setVisibility(option.value)}
             >
-              {option.label}
+              <span>{option.label}</span>
+              <small>{option.description}</small>
             </button>
           ))}
         </div>
-        <p className="helper-text">友達のみ公開はPhase 10以降で対応予定です。</p>
+        <p className="helper-text">友達は相互フォローの人だけです。位置情報を含むため、公開範囲を選んでから投稿してください。</p>
 
         <label className="comment-field">
           <span>コメント</span>

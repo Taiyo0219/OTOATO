@@ -10,6 +10,7 @@ import authRoutes from "./routes/authRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import musicRoutes from "./routes/musicRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/health", healthRoutes);
 app.use("/api/music", musicRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/users", userRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

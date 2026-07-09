@@ -28,6 +28,16 @@ const selectedPostMarkerIcon = L.divIcon({
   popupAnchor: [0, -19]
 });
 
+function createNumberedPostMarkerIcon(index, isSelected) {
+  return L.divIcon({
+    className: `otoato-post-marker is-numbered${isSelected ? " is-selected" : ""}`,
+    html: `<span>${index}</span>`,
+    iconSize: isSelected ? [38, 38] : [34, 34],
+    iconAnchor: isSelected ? [19, 19] : [17, 17],
+    popupAnchor: [0, isSelected ? -19 : -17]
+  });
+}
+
 const selectedLocationIcon = L.divIcon({
   className: "otoato-selected-location-marker",
   html: "<span></span>",
@@ -74,11 +84,21 @@ function LeafletMap({
   selectedLocation,
   onSelectPost,
   onSelectLocation,
-  compact = false
+  compact = false,
+  numbered = false
 }) {
+  const selectedPostLocation = useMemo(() => {
+    const selectedPost = posts.find((post) => post.id === selectedPostId);
+    return selectedPost?.location || posts.find((post) => post.location)?.location || null;
+  }, [posts, selectedPostId]);
+
   const center = useMemo(() => {
     if (selectedLocation) {
       return [selectedLocation.latitude, selectedLocation.longitude];
+    }
+
+    if (selectedPostLocation) {
+      return [selectedPostLocation.latitude, selectedPostLocation.longitude];
     }
 
     if (currentLocation) {
@@ -86,9 +106,9 @@ function LeafletMap({
     }
 
     return DEFAULT_CENTER;
-  }, [currentLocation, selectedLocation]);
+  }, [currentLocation, selectedLocation, selectedPostLocation]);
 
-  const zoom = currentLocation || selectedLocation ? 16 : 15;
+  const zoom = currentLocation || selectedLocation || selectedPostLocation ? 16 : 15;
   const currentPosition = currentLocation ? [currentLocation.latitude, currentLocation.longitude] : null;
 
   return (
@@ -126,19 +146,24 @@ function LeafletMap({
         </Marker>
       ) : null}
 
-      {posts.map((post) => {
+      {posts.map((post, index) => {
         if (!post.location) {
           return null;
         }
 
         const position = [post.location.latitude, post.location.longitude];
         const isSelected = selectedPostId === post.id;
+        const icon = numbered
+          ? createNumberedPostMarkerIcon(index + 1, isSelected)
+          : isSelected
+            ? selectedPostMarkerIcon
+            : postMarkerIcon;
 
         return (
           <Marker
             key={post.id}
             position={position}
-            icon={isSelected ? selectedPostMarkerIcon : postMarkerIcon}
+            icon={icon}
             eventHandlers={{
               click: () => onSelectPost?.(post)
             }}

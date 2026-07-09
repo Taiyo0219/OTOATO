@@ -125,6 +125,84 @@ export async function logoutUser() {
   }
 }
 
+export async function fetchMyProfile() {
+  const data = await requestJson("/users/me/profile", {
+    includeAuth: true
+  });
+
+  return data.user;
+}
+
+export async function updateMyProfile(payload) {
+  const data = await requestJson("/users/me/profile", {
+    method: "PATCH",
+    includeAuth: true,
+    body: JSON.stringify(payload)
+  });
+
+  return data.user;
+}
+
+export async function searchUsers(query) {
+  const normalizedQuery = query.trim();
+
+  if (!normalizedQuery) {
+    return [];
+  }
+
+  const data = await requestJson(`/users/search?q=${encodeURIComponent(normalizedQuery)}`, {
+    includeAuth: true
+  });
+
+  return data.users || [];
+}
+
+export async function fetchUserProfile(userId) {
+  return requestJson(`/users/${encodeURIComponent(userId)}`, {
+    includeAuth: true
+  });
+}
+
+export async function followUser(userId) {
+  const data = await requestJson(`/users/${encodeURIComponent(userId)}/follow`, {
+    method: "POST",
+    includeAuth: true
+  });
+
+  return data.user;
+}
+
+export async function unfollowUser(userId) {
+  const data = await requestJson(`/users/${encodeURIComponent(userId)}/follow`, {
+    method: "DELETE",
+    includeAuth: true
+  });
+
+  return data.user;
+}
+
+export async function fetchFollowers(userId) {
+  const data = await requestJson(`/users/${encodeURIComponent(userId)}/followers`, {
+    includeAuth: true
+  });
+
+  return data.users || [];
+}
+
+export async function fetchFollowing(userId) {
+  const data = await requestJson(`/users/${encodeURIComponent(userId)}/following`, {
+    includeAuth: true
+  });
+
+  return data.users || [];
+}
+
+export async function fetchUserDayTrace({ userId, date }) {
+  return requestJson(`/users/${encodeURIComponent(userId)}/day-trace?date=${encodeURIComponent(date)}`, {
+    includeAuth: true
+  });
+}
+
 export async function searchMusic(query) {
   const normalizedQuery = query.trim();
 
@@ -184,7 +262,9 @@ export async function fetchNearbyPosts({ latitude, longitude, radius = 1000 }) {
       lng: String(longitude),
       radius: String(radius)
     });
-    const data = await requestJson(`/posts/nearby?${params.toString()}`);
+    const data = await requestJson(`/posts/nearby?${params.toString()}`, {
+      includeAuth: true
+    });
 
     return {
       source: "api",
@@ -206,7 +286,9 @@ export async function fetchArchivePosts(date) {
   }
 
   try {
-    const data = await requestJson(`/posts/archive?date=${encodeURIComponent(date)}`);
+    const data = await requestJson(`/posts/archive?date=${encodeURIComponent(date)}`, {
+      includeAuth: true
+    });
 
     return {
       source: "api",

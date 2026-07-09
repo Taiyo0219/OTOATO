@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CalendarDays } from "lucide-react";
 import AppHeader from "../components/AppHeader.jsx";
 import LeafletMap from "../components/LeafletMap.jsx";
 import LocationStatusPanel from "../components/LocationStatusPanel.jsx";
@@ -77,6 +78,11 @@ function HomePage({ navigate }) {
 
       {postsStatus === "loading" ? <p className="status-banner">周辺の投稿を取得中です</p> : null}
       {postsMessage ? <p className="status-banner">{postsMessage}</p> : null}
+
+      <button className="wide-soft-button" type="button" onClick={() => navigate("/archive")}>
+        <CalendarDays size={18} aria-hidden="true" />
+        アーカイブを見る
+      </button>
 
       <section className="content-section">
         <div className="section-heading">

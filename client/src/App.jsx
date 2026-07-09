@@ -6,10 +6,14 @@ import ArchivePage from "./pages/ArchivePage.jsx";
 import MyPage from "./pages/MyPage.jsx";
 import PostDetailPage from "./pages/PostDetailPage.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
+import ExplorePage from "./pages/ExplorePage.jsx";
+import UserProfilePage from "./pages/UserProfilePage.jsx";
+import DayTracePage from "./pages/DayTracePage.jsx";
 import { useCurrentRoute } from "./hooks/useCurrentRoute.js";
 
 const routeTable = {
   "/": HomePage,
+  "/explore": ExplorePage,
   "/post": PostPage,
   "/archive": ArchivePage,
   "/mypage": MyPage,
@@ -21,6 +25,14 @@ function App() {
   const Page = useMemo(() => {
     if (path.startsWith("/posts/")) {
       return PostDetailPage;
+    }
+
+    if (/^\/users\/[^/]+\/day-trace$/.test(path)) {
+      return DayTracePage;
+    }
+
+    if (/^\/users\/[^/]+$/.test(path)) {
+      return UserProfilePage;
     }
 
     return routeTable[path] || HomePage;

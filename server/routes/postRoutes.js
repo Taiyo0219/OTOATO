@@ -5,8 +5,8 @@ import { attachOptionalUser, requireAuth } from "../middleware/authMiddleware.js
 const router = Router();
 
 router.post("/", requireAuth, createPost);
-router.get("/nearby", getNearbyPosts);
-router.get("/archive", getArchivePosts);
+router.get("/nearby", attachOptionalUser, getNearbyPosts);
+router.get("/archive", attachOptionalUser, getArchivePosts);
 router.get("/mine", requireAuth, getMyPosts);
 router.get("/:id", attachOptionalUser, getPostById);
 

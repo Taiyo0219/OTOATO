@@ -28,7 +28,7 @@ export function serializePost(post) {
       latitude,
       longitude
     },
-    visibility: raw.visibility,
+    visibility: raw.visibility || "public",
     comment: raw.comment || "",
     createdAt: raw.createdAt,
     userId,
